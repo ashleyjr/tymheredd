@@ -1,1 +1,9 @@
 # tymheredd
+
+## MySQL
+
+CREATE DATABASE db;
+USE db;
+CREATE USER 'esp'@'localhost' IDENTIFIED BY 'test';
+GRANT CREATE, ALTER, DROP, INSERT, UPDATE, DELETE, SELECT, REFERENCES, RELOAD on *.* TO 'esp'@'localhost' WITH GRANT OPTION;
+
