@@ -46,68 +46,44 @@ class Db {
       }
    }
 
-   function getTableDay() {
+   function getDay() {
       $day = strtotime("today");  
       $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$day;
       $result = $this->db->query($sql);  
-	   while ($row = $result->fetch_assoc()) {
+      $data = [];
+      while ($row = $result->fetch_assoc()) {
 		   $timestamp = $row["TIME_THEN"];
-         $offset = ($timestamp - $day) / 3600;
-         echo "[".$offset.",".$row['TEMP']."],";
+         $offset = ($timestamp - $day) / 3600; 
+         $data[] = array($offset, (int)$row['TEMP']);
       }
-      return json_encode(["Test",1]);
+      return json_encode($data);
    }
 
-   function getTableWeek() { 
-      echo "data.addColumn('datetime', 'time');\n";
-      echo "data.addColumn('number', 'temprature');\n";
-      echo "data.addRows([";
-      $day = strtotime("today -6 days");  
+   function getWeek() {
+      $day = strtotime("today - 6 days");  
       $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$day;
       $result = $this->db->query($sql);  
-	   while ($row = $result->fetch_assoc()) {
+      $data = [];
+      while ($row = $result->fetch_assoc()) {
 		   $timestamp = $row["TIME_THEN"];
-         $y = gmdate("Y", $timestamp); 
-         $m = gmdate("m", $timestamp); 
-         $d = gmdate("d", $timestamp); 
-         $h = gmdate("h", $timestamp); 
-         echo "[new Date(".$y.",".$d.",".$m.",".$h."),".$row['TEMP']."],\n";
+         $offset = ($timestamp - $day) / (3600 * 24); 
+         $data[] = array($offset, (int)$row['TEMP']);
       }
-      echo "]);";
-      echo "var options = {";
-      echo "      hAxis: {";
-      echo "         title: 'Time',";
-      echo "         viewWindow: {";
-      echo "            min: 0,";
-      echo "            max: 24*7*2";
-      echo "         },";
-      echo "      },";
-      echo "      gridlines: {";
-      echo "         count: -1,";
-      echo "         units: {";
-      echo "            days: {format: ['MMM dd']},";
-      echo "            hours: {format: ['HH:mm', 'ha']},";
-      echo "         }";
-      echo "      },";
-      echo "      vAxis: {";
-      echo "         title: 'Temprature (C)'";
-      echo "      }";
-      echo "   };";
+      return json_encode($data);
    }
 
-   function getTableMonth() {
-      $day = strtotime("last month"); 
-      $this->__getTable($day); 
-   }
-
-   function __getTable($from) {
-      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$from;
+   function getMonth() {
+      $day = strtotime("today - 5 weeks");  
+      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$day;
       $result = $this->db->query($sql);  
-	   while ($row = $result->fetch_assoc()) {
+      $data = [];
+      while ($row = $result->fetch_assoc()) {
 		   $timestamp = $row["TIME_THEN"];
-         $offset = ($timestamp - $from) / 3600;
-         echo "[".$offset.",".$row['TEMP']."],";
-		}
+         $offset = ($timestamp - $day) / (3600 * 24); 
+         $data[] = array($offset, (int)$row['TEMP']);
+      }
+      return json_encode($data);
    }
+
 }
 ?>

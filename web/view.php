@@ -1,11 +1,15 @@
 <?php
    require __DIR__ . '/db.php';
-   $db = new Db($_GET['password']);
-   echo $db->getTableDay();
+   $db = new Db($_GET['password']); 
 ?>
 
 <html>
-   <head>
+   <head> 
+      <script>
+         var day= <?php echo $db->getDay()?>;
+         var week= <?php echo $db->getWeek()?>;
+         var month= <?php echo $db->getMonth()?>;
+      </script>
       <script 
          type="text/javascript" 
          src="https://www.gstatic.com/charts/loader.js">
@@ -17,9 +21,12 @@
    </head>
    <body> 
       <div  
-         id="line_top_x" 
+         id="chart" 
          style="width: 900px; height: 500px">
-      </div>  
+      </div>
+      <input type="button" id="day"    value="Day" />
+      <input type="button" id="week"   value="Week" />
+      <input type="button" id="month"  value="Month" /> 
    </body>
 </html>
 
