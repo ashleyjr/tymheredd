@@ -46,44 +46,26 @@ class Db {
       }
    }
 
-   function getDay() {
-      $day = strtotime("today");  
-      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$day;
+   function __getTime($time) {
+      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$time;
       $result = $this->db->query($sql);  
       $data = [];
       while ($row = $result->fetch_assoc()) {
-		   $timestamp = $row["TIME_THEN"];
-         $offset = ($timestamp - $day) / 3600; 
-         $data[] = array($offset, (int)$row['TEMP']);
+         $data[] = array($row["TIME_THEN"], (int)$row['TEMP']);
       }
       return json_encode($data);
+   }
+
+   function getDay() {
+      return $this->__getTime(strtotime("today"));   
    }
 
    function getWeek() {
-      $day = strtotime("today - 6 days");  
-      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$day;
-      $result = $this->db->query($sql);  
-      $data = [];
-      while ($row = $result->fetch_assoc()) {
-		   $timestamp = $row["TIME_THEN"];
-         $offset = ($timestamp - $day) / (3600 * 24); 
-         $data[] = array($offset, (int)$row['TEMP']);
-      }
-      return json_encode($data);
+      return $this->__getTime(strtotime("today - 6 days"));   
    }
 
    function getMonth() {
-      $day = strtotime("today - 5 weeks");  
-      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$day;
-      $result = $this->db->query($sql);  
-      $data = [];
-      while ($row = $result->fetch_assoc()) {
-		   $timestamp = $row["TIME_THEN"];
-         $offset = ($timestamp - $day) / (3600 * 24); 
-         $data[] = array($offset, (int)$row['TEMP']);
-      }
-      return json_encode($data);
+      return $this->__getTime(strtotime("today - 5 weeks"));   
    }
-
 }
 ?>

@@ -15,7 +15,7 @@ with urllib.request.urlopen(url) as f:
 for i in range(100):
     params = urllib.parse.urlencode({
         'password': "test",
-        'temp': str(i % 3),
+        'temp': i,
         'time': str(int(time.time()- (3600 * 4 * i))),
     })
     url = "http://localhost:8000/submit.php?%s" % params
