@@ -1,0 +1,4 @@
+esp/sdkconfig
+esp/sdkconfig.old
+esp/build
+esp/dependencies.lock
