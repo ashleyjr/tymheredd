@@ -6,8 +6,9 @@
 <html>
    <head> 
       <script>
-         var day= <?php echo $db->getDay()?>;
-         var week= <?php echo $db->getWeek()?>;
+         var hour = <?php echo $db->getHour()?>;
+         var day  = <?php echo $db->getDay()?>;
+         var week = <?php echo $db->getWeek()?>;
          var month= <?php echo $db->getMonth()?>;
       </script>
       <script 
@@ -24,6 +25,7 @@
          id="chart" 
          style="width: 900px; height: 500px">
       </div>
+      <input type="button" id="hour"   value="Hour" />
       <input type="button" id="day"    value="Day" />
       <input type="button" id="week"   value="Week" />
       <input type="button" id="month"  value="Month" /> 

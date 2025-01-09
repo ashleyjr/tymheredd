@@ -47,13 +47,17 @@ class Db {
    }
 
    function __getTime($time) {
-      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$time;
+      $sql = "SELECT TIME_NOW, TEMP FROM data WHERE TIME_NOW > ".$time;
       $result = $this->db->query($sql);  
       $data = [];
       while ($row = $result->fetch_assoc()) {
-         $data[] = array($row["TIME_THEN"], (int)$row['TEMP']);
+         $data[] = array($row["TIME_NOW"], (int)$row['TEMP']);
       }
       return json_encode($data);
+   }
+   
+   function getHour() {
+      return $this->__getTime(strtotime("now - 1 hour"));   
    }
 
    function getDay() {

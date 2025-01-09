@@ -6,4 +6,9 @@
       $_GET['temp']
    );
 ?>
-
+<html>
+   <body>
+      time: <?php echo $_GET['time']; ?><br>
+      temp: <?php echo $_GET['temp']; ?>
+   </body>
+</html>

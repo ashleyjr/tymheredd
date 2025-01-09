@@ -36,6 +36,8 @@ class Tester:
             with urllib.request.urlopen(url) as f:
                 print(f.read().decode('utf-8'))
 
+            time.sleep(0.04)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--password')
