@@ -11,6 +11,7 @@
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/event_groups.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -23,10 +24,12 @@
 #include "lwip/netdb.h"
 #include "lwip/dns.h"
 #include "sdkconfig.h"
+#include "regex.h"
 #include "../../../tymheredd_secret/secrets.h"
 
 #define WEB_PORT "80"
 #define WEB_PATH "/tymheredd/web/submit.php"
+#define DEFAULT_SCAN_LIST_SIZE 10 
 
 static const char *TAG = "tymheredd";
 
@@ -35,7 +38,41 @@ static const struct addrinfo hints = {
    .ai_socktype = SOCK_STREAM,
 };
 
-static void submit_then_sleep(void *pvParameters){ 
+int rssi_scan(void){ 
+   uint16_t number = DEFAULT_SCAN_LIST_SIZE; 
+   uint16_t ap_count = 0;   
+   int my_rssi = 0;
+   wifi_ap_record_t ap_info[DEFAULT_SCAN_LIST_SIZE];
+   memset(ap_info, 0, sizeof(ap_info));
+   // Start WiFi
+   esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+   assert(sta_netif);
+   wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+   ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+   ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+   ESP_ERROR_CHECK(esp_wifi_start());
+   // Scan
+   esp_wifi_scan_start(NULL, true);
+   ESP_LOGI(TAG, "Scanning for %s", CONFIG_EXAMPLE_WIFI_SSID);
+   ESP_LOGI(TAG, "Max AP number ap_info can hold = %u", number);
+   ESP_ERROR_CHECK(esp_wifi_scan_get_ap_num(&ap_count));
+   ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number, ap_info));
+   ESP_LOGI(TAG, "Total APs scanned = %u, actual AP number ap_info holds = %u", ap_count, number);
+   for (int i = 0; i < number; i++) {
+      ESP_LOGI(TAG, "%s\t\t%d", ap_info[i].ssid, ap_info[i].rssi);
+      if(0 == strcmp((char *)ap_info[i].ssid, CONFIG_EXAMPLE_WIFI_SSID)){
+         my_rssi = ap_info[i].rssi;
+      }
+   }
+   // Tear down WiFi
+   ESP_ERROR_CHECK(esp_wifi_stop());
+   ESP_ERROR_CHECK(esp_wifi_deinit());
+   esp_netif_destroy(sta_netif);
+   // Return RSSI of matched
+   return my_rssi;
+}
+
+static void submit(int rssi){ 
    struct addrinfo *res;
    struct in_addr *addr;
    int s, r;
@@ -59,7 +96,7 @@ static void submit_then_sleep(void *pvParameters){
       "Host: "WEB_SERVER":"WEB_PORT"\r\n"
       "User-Agent: esp-idf/1.0 esp32\r\n"
       "\r\n",
-      0,
+      rssi,
       0
    );
    ESP_LOGI(TAG, "Request (%d chars): \n\r%s", strlen(request), request);
@@ -129,7 +166,9 @@ static void submit_then_sleep(void *pvParameters){
    ESP_LOGI(TAG, "... done reading from socket.");
    ESP_LOGI(TAG, "Total chars=%d, last read return=%d, errno=%d.", total_r, r, errno);
    close(s);
-   
+}
+
+static void goto_sleep(void){ 
    // Go to deep sleep ready to do it all over again 
    const int wakeup_time_sec = 60;
    printf("Enabling timer wakeup, %ds\n", wakeup_time_sec);
@@ -139,9 +178,15 @@ static void submit_then_sleep(void *pvParameters){
 
 
 void app_main(void){
-    ESP_ERROR_CHECK(nvs_flash_init());
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    ESP_ERROR_CHECK(example_connect());
-    xTaskCreate(&submit_then_sleep, "submit_then_sleep", 4096, NULL, 5, NULL);
+   int rssi;
+   ESP_ERROR_CHECK(nvs_flash_init()); 
+   ESP_ERROR_CHECK(esp_netif_init());
+   ESP_ERROR_CHECK(esp_event_loop_create_default());
+   rssi = rssi_scan();   
+   // If 0 the network was not found so no connect possible
+   if(rssi != 0){
+      ESP_ERROR_CHECK(example_connect());
+      submit(rssi); 
+   }
+   goto_sleep();
 }

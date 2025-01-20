@@ -47,11 +47,12 @@ class Db {
    }
 
    function __getTime($time) {
-      $sql = "SELECT TIME_NOW, TEMP FROM data WHERE TIME_NOW > ".$time;
+      date_default_timezone_set('UTC');
+      $sql = "SELECT TIME_THEN, TEMP FROM data WHERE TIME_THEN > ".$time;
       $result = $this->db->query($sql);  
       $data = [];
       while ($row = $result->fetch_assoc()) {
-         $data[] = array($row["TIME_NOW"], (int)$row['TEMP']);
+         $data[] = array($row["TIME_THEN"], (int)$row['TEMP']);
       }
       return json_encode($data);
    }

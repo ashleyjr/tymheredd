@@ -29,7 +29,6 @@ class Tester:
             params = urllib.parse.urlencode({
                 'password': self.password,
                 'temp': i,
-                'time': str(int(time.time()- (3600 * 4 * i))),
             })
             url = f"{self.url}/submit.php?%s" % params
             print(url)

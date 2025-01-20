@@ -25,14 +25,15 @@ function drawChart() {
       }; 
       data = new google.visualization.DataTable();
       data.addColumn('number', 'time');
-      data.addColumn('number', 'temp');
-      // Unix time to date in ms
-      const now_mins = Date.now() / (1000 * 60);
+      data.addColumn('number', 'temp'); 
+      // .js returns in ms for unix time
+      const now = Date.now() / 1000;
       for (let i=0; i<hour.length;i++){ 
-         const then_mins = new Date(day[i][0]) / (1000 * 60);
-         const date = then_mins - now_mins
-         data.addRow([date,hour[i][1]]);
-      } 
+         // Turn to mins and is negative
+         const mins = (day[i][0] - now) / 60; 
+         data.addRow([mins,hour[i][1]]);
+      }
+      console.log(data);
       chart = new google.charts.Line(document.getElementById('chart'));
       chart.draw(data, google.charts.Line.convertOptions(options));
    }
