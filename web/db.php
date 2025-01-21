@@ -72,5 +72,14 @@ class Db {
    function getMonth() {
       return $this->__getTime(strtotime("today - 5 weeks"));   
    }
+
+   function getNumEntries() {
+      date_default_timezone_set('UTC');
+      $sql = "SELECT COUNT(*) FROM data";
+      $result = $this->db->query($sql);   
+      $row = $result->fetch_assoc();
+      return json_encode((int)$row["COUNT(*)"]);
+   }
+   
 }
 ?>

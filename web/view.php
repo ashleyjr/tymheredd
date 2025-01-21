@@ -28,7 +28,10 @@
       <input type="button" style="width: 400px; height: 100px;" id="hour"   value="Hour"/><br><br>
       <input type="button" style="width: 400px; height: 100px;" id="day"    value="Day" /><br><br>
       <input type="button" style="width: 400px; height: 100px;" id="week"   value="Week" /><br><br>
-      <input type="button" style="width: 400px; height: 100px;" id="month"  value="Month" /> 
+      <input type="button" style="width: 400px; height: 100px;" id="month"  value="Month" />
+      <br>
+      <b>DATA</b><br>
+      <b>Number of rows: <?php echo $db->getNumEntries()?></b>
    </body>
 </html>
 
