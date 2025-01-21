@@ -35,7 +35,7 @@ class Tester:
             with urllib.request.urlopen(url) as f:
                 print(f.read().decode('utf-8'))
 
-            time.sleep(0.04)
+            time.sleep(0.1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -6,17 +6,18 @@ function drawChart() {
    var chart;
  
    function plotHour() {
+      // .js returns in ms for unix time
+      const now = Math.round(Date.now() / 1000);
       var options = {
          chart: {
-            title: 'Hour', 
+            title: 'Last Hour - Since ' + new Date(now * 1000), 
          },
-         width: 900,
-         height: 500,
          hAxis: {
-            title: "Time (Mins)", 
+            title: "Time (Mins)",  
             gridlines: {
-               count: 60
-            }, 
+               count: 24
+            },
+            ticks: [0,10,20],
             viewWindow: {
                min: -60,
                max: 0
@@ -25,9 +26,7 @@ function drawChart() {
       }; 
       data = new google.visualization.DataTable();
       data.addColumn('number', 'time');
-      data.addColumn('number', 'temp'); 
-      // .js returns in ms for unix time
-      const now = Date.now() / 1000;
+      data.addColumn('number', 'temp');  
       for (let i=0; i<hour.length;i++){ 
          // Turn to mins and is negative
          const mins = (day[i][0] - now) / 60; 
@@ -39,18 +38,29 @@ function drawChart() {
    }
 
    function plotDay() {
+      // .js returns in ms for unix time
+      const now = new Date();
+      const d = now.getDate();
+      const m = now.getMonth() + 1;
+      const y = now.getFullYear();
+      const today = `${y}-${m}-${d}`;
+      const start = new Date(today); 
+      const end = new Date(start.getTime() + (24 * 60 * 60 * 1000)); 
+      console.log(end)
       var options = {
          chart: {
-            title: 'Today', 
+            title: 'Today ' + today, 
          },
-         width: 900,
-         height: 500,
          hAxis: {
             title: "Time (Hours)",
             format: "HH:mm:SS", 
             gridlines: {
                count: 24
-            }  
+            },
+            viewWindow: {
+               min: start,
+               max: end 
+            } 
          }
       }; 
       data = new google.visualization.DataTable();
@@ -69,14 +79,9 @@ function drawChart() {
          chart: {
             title: 'Week', 
          },
-         width: 900,
-         height: 500,
          hAxis: {
-            title: "Time (Days)",
-            format: "dd/MM/yy", 
-            gridlines: {
-               count: 7
-            }  
+            title: "Day @ Time",
+            format: "dd/MM/yy @ HH:mm",   
          }
       }; 
       data = new google.visualization.DataTable();
@@ -95,14 +100,9 @@ function drawChart() {
          chart: {
             title: 'Month', 
          },
-         width: 900,
-         height: 500,
          hAxis: {
-            title: "Time (Days)",
-            format: "dd/MM/yy", 
-            gridlines: {
-               count: 35
-            }  
+            title: "Day @ Time",
+            format: "dd/MM/yy @ HH:mm",  
          }
       };  
       // Unix time to date in ms
