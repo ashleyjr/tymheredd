@@ -45,8 +45,7 @@ function drawChart() {
       const y = now.getFullYear();
       const today = `${y}-${m}-${d}`;
       const start = new Date(today); 
-      const end = new Date(start.getTime() + (24 * 60 * 60 * 1000)); 
-      console.log(end)
+      const end = new Date(start.getTime() + (24 * 60 * 60 * 1000));  
       var options = {
          chart: {
             title: 'Today ' + today, 
@@ -75,13 +74,26 @@ function drawChart() {
    }
 
    function plotWeek() {
+      // .js returns in ms for unix time
+      const now = new Date();
+      const d = now.getDate();
+      const m = now.getMonth() + 1;
+      const y = now.getFullYear();
+      const today = `${y}-${m}-${d}`;
+      const today_date = new Date(today)
+      const start = new Date(today_date.getTime() - (6 * 24 * 60 * 60 * 1000)); 
+      const end = new Date(today_date.getTime() + (24 * 60 * 60 * 1000));  
       var options = {
          chart: {
             title: 'Week', 
          },
          hAxis: {
             title: "Day @ Time",
-            format: "dd/MM/yy @ HH:mm",   
+            format: "dd/MM/yy @ HH:mm",
+            viewWindow: {
+               min: start,
+               max: end 
+            }
          }
       }; 
       data = new google.visualization.DataTable();
@@ -96,15 +108,31 @@ function drawChart() {
    }
 
    function plotMonth() {
+      // .js returns in ms for unix time
+      const now = new Date();
+      const d = now.getDate();
+      const m = now.getMonth() + 1;
+      const y = now.getFullYear();
+      const today = `${y}-${m}-${d}`;
+      const today_date = new Date(today)
+      const start = new Date(today_date.getTime() - (5 * 7 * 24 * 60 * 60 * 1000)); 
+      const end = new Date(today_date.getTime() + (24 * 60 * 60 * 1000));  
       var options = {
          chart: {
             title: 'Month', 
          },
          hAxis: {
             title: "Day @ Time",
-            format: "dd/MM/yy @ HH:mm",  
+            format: "dd/MM/yy @ HH:mm", 
+            viewWindow: {
+               min: start,
+               max: end 
+            }
          }
       };  
+      data = new google.visualization.DataTable();
+      data.addColumn('date', 'time');
+      data.addColumn('number', 'temp');
       // Unix time to date in ms
       for (let i=0; i<month.length;i++){ 
          data.addRow([new Date(month[i][0] * 1000),month[i][1]]);  
@@ -113,7 +141,7 @@ function drawChart() {
       chart.draw(data, google.charts.Line.convertOptions(options));
    }
 
-   plotHour();
+   plotDay();
    document.getElementById('hour').addEventListener('click', function () { plotHour(); }, false);
    document.getElementById('day').addEventListener('click', function () { plotDay(); }, false);
    document.getElementById('week').addEventListener('click', function () { plotWeek(); }, false);

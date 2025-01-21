@@ -25,10 +25,10 @@
          id="chart" 
          style="width: 1200px; height: 600px">
       </div>
-      <input type="button" style="width: 200px; height: 50px;" id="hour"   value="Hour"/><br><br>
-      <input type="button" style="width: 200px; height: 50px;" id="day"    value="Day" /><br><br>
-      <input type="button" style="width: 200px; height: 50px;" id="week"   value="Week" /><br><br>
-      <input type="button" style="width: 200px; height: 50px;" id="month"  value="Month" /> 
+      <input type="button" style="width: 400px; height: 100px;" id="hour"   value="Hour"/><br><br>
+      <input type="button" style="width: 400px; height: 100px;" id="day"    value="Day" /><br><br>
+      <input type="button" style="width: 400px; height: 100px;" id="week"   value="Week" /><br><br>
+      <input type="button" style="width: 400px; height: 100px;" id="month"  value="Month" /> 
    </body>
 </html>
 
