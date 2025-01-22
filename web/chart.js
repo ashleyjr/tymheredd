@@ -141,10 +141,15 @@ function drawChart() {
       chart.draw(data, google.charts.Line.convertOptions(options));
    }
 
+   // Plot day by default
    plotDay();
+   
+   // Buttons
    document.getElementById('hour').addEventListener('click', function () { plotHour(); }, false);
    document.getElementById('day').addEventListener('click', function () { plotDay(); }, false);
    document.getElementById('week').addEventListener('click', function () { plotWeek(); }, false);
    document.getElementById('month').addEventListener('click', function () { plotMonth(); }, false);
+
+
 }
 

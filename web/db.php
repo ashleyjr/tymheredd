@@ -72,14 +72,33 @@ class Db {
    function getMonth() {
       return $this->__getTime(strtotime("today - 5 weeks"));   
    }
-
-   function getNumEntries() {
+   
+   function getTimeNow() {
       date_default_timezone_set('UTC');
+      return date('D M j Y H:i:s'); 
+   }
+   
+   function getNumEntries() {
       $sql = "SELECT COUNT(*) FROM data";
       $result = $this->db->query($sql);   
       $row = $result->fetch_assoc();
       return json_encode((int)$row["COUNT(*)"]);
    }
    
+   function getFirstEntry() { 
+      $sql = "SELECT MIN(TIME_THEN) FROM data";
+      $result = $this->db->query($sql);   
+      $row = $result->fetch_assoc();
+      $s = date('D M j Y H:i:s', (int)$row["MIN(TIME_THEN)"]);
+      return $s;
+   }
+
+   function getLastEntry() { 
+      $sql = "SELECT MAX(TIME_THEN) FROM data";
+      $result = $this->db->query($sql);   
+      $row = $result->fetch_assoc();
+      $s = date('D M j Y H:i:s', (int)$row["MAX(TIME_THEN)"]);
+      return $s;
+   }
 }
 ?>

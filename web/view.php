@@ -20,7 +20,7 @@
          src="chart.js">
       </script>  
    </head>
-   <body> 
+   <body style="font-family: monospace" > 
       <div  
          id="chart" 
          style="width: 1200px; height: 600px">
@@ -29,9 +29,18 @@
       <input type="button" style="width: 400px; height: 100px;" id="day"    value="Day" /><br><br>
       <input type="button" style="width: 400px; height: 100px;" id="week"   value="Week" /><br><br>
       <input type="button" style="width: 400px; height: 100px;" id="month"  value="Month" />
-      <br>
-      <b>DATA</b><br>
-      <b>Number of rows: <?php echo $db->getNumEntries()?></b>
+      <p>
+      <table border="1">
+         <tr>  <th>Data</th>           <th>Value</th>                               </tr>
+         <tr>  <td>Rows</td>           <td><?php echo $db->getNumEntries()?></td>   </tr>
+         <tr>  <td>First Entry</td>    <td><?php echo $db->getFirstEntry()?></td>   </tr>
+         <tr>  <td>Last Entry</td>     <td><?php echo $db->getLastEntry()?></td>    </tr>        
+         <tr>  <td>Server Time</td>    <td><?php echo $db->getTimeNow()?></td>      </tr>        
+         <tr>  <td>Client Time</td>    <td id="time"></td>                          </tr>             
+      </table>
+      <script>
+         document.getElementById('time').innerHTML = new Date(); 
+      </script>
    </body>
 </html>
 
