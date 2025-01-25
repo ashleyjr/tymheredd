@@ -41,6 +41,10 @@
       <script>
          document.getElementById('time').innerHTML = new Date(); 
       </script>
+      <div  
+         id="chart_hist" 
+         style="width: 1200px; height: 600px">
+      </div>
    </body>
 </html>
 

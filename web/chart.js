@@ -1,4 +1,4 @@
-google.charts.load('current', {'packages':['line']});
+google.charts.load('current', {'packages':['line','corechart']});
 google.charts.setOnLoadCallback(drawChart);
 
 function drawChart() {
@@ -141,9 +141,35 @@ function drawChart() {
       chart.draw(data, google.charts.Line.convertOptions(options));
    }
 
+   function plotHist() {
+      // Compute time between submissions
+      let times = [];
+      for (let i=0; i<month.length;i++){ 
+         times.push(Number(month[i][0]));  
+      }     
+      times.sort();
+      data = new google.visualization.DataTable();
+      data.addColumn('number','gap')
+      for (let i=0; i<(times.length-1);i++){ 
+         let diff = times[i+1] - times[i]; 
+         data.addRow([diff]);    
+      }
+      
+      // Update plot
+      var options = {
+        title: 'Test',
+        legend: { position: 'none' },
+      };
+      var chart = new google.visualization.Histogram(document.getElementById('chart_hist'));
+      chart.draw(data, options); 
+   }
+   
    // Plot day by default
    plotDay();
    
+   // Always plot histogram
+   plotHist(); 
+
    // Buttons
    document.getElementById('hour').addEventListener('click', function () { plotHour(); }, false);
    document.getElementById('day').addEventListener('click', function () { plotDay(); }, false);
