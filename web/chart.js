@@ -157,8 +157,11 @@ function drawChart() {
       
       // Update plot
       var options = {
-        title: 'Test',
-        legend: { position: 'none' },
+         title: 'Test',
+         legend: { position: 'none' },
+         vAxis: {
+            scaleType: 'log'
+         }
       };
       var chart = new google.visualization.Histogram(document.getElementById('chart_hist'));
       chart.draw(data, options); 
