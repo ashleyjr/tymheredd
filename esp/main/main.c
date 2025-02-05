@@ -26,7 +26,23 @@
 #include "sdkconfig.h"
 #include "regex.h"
 #include "../../../tymheredd_secret/secrets.h"
+#include "driver/i2c.h"
 
+// I2C
+#define I2C_MASTER_SCL_IO              22    
+#define I2C_MASTER_SDA_IO              21     
+#define I2C_MASTER_NUM                 0      
+#define I2C_MASTER_FREQ_HZ             400000 
+#define I2C_MASTER_TX_BUF_DISABLE      0      
+#define I2C_MASTER_RX_BUF_DISABLE      0      
+#define I2C_MASTER_TIMEOUT_MS          1000
+#define MCP9808_SENSOR_I2C_ADDR        0x18 
+#define MCP9808_SENSOR_TEMP_REG        0x05
+#define MCP9808_SENSOR_TEMP_SIGN_MASK  0x1000    
+#define MCP9808_SENSOR_TEMP_DATA_MASK  0x0FFF
+#define MCP9808_SENSOR_TEMP_SCALE      16
+
+// WEB
 #define WEB_PORT "80"
 #define WEB_PATH "/tymheredd/web/submit.php"
 #define DEFAULT_SCAN_LIST_SIZE 10 
@@ -37,6 +53,56 @@ static const struct addrinfo hints = {
    .ai_family = AF_INET,
    .ai_socktype = SOCK_STREAM,
 };
+
+static esp_err_t mpu9250_register_read(uint8_t reg_addr, uint8_t *data){
+    return i2c_master_write_read_device(
+      I2C_MASTER_NUM, 
+      MCP9808_SENSOR_I2C_ADDR, 
+      &reg_addr, 
+      1, 
+      data, 
+      2, 
+      I2C_MASTER_TIMEOUT_MS / portTICK_PERIOD_MS
+   );
+}
+
+
+static esp_err_t i2c_master_init(void)
+{
+    int i2c_master_port = I2C_MASTER_NUM;
+
+    i2c_config_t conf = {
+        .mode = I2C_MODE_MASTER,
+        .sda_io_num = I2C_MASTER_SDA_IO,
+        .scl_io_num = I2C_MASTER_SCL_IO,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .master.clk_speed = I2C_MASTER_FREQ_HZ,
+    };
+
+    i2c_param_config(i2c_master_port, &conf);
+
+    return i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
+}
+
+float read_temp(void){
+   uint8_t  raw_data[2];
+   uint16_t data;
+   uint16_t sign;
+   uint16_t temp;
+   float    act;
+   ESP_ERROR_CHECK(i2c_master_init());  
+   ESP_ERROR_CHECK(mpu9250_register_read(MCP9808_SENSOR_TEMP_REG, raw_data)); 
+   data = (raw_data[0] << 8) | raw_data[1]; 
+   sign = data & MCP9808_SENSOR_TEMP_SIGN_MASK;
+   temp = data & MCP9808_SENSOR_TEMP_DATA_MASK;
+   act  = (float)temp; 
+   act /= MCP9808_SENSOR_TEMP_SCALE;
+   if(sign){
+      act -= MCP9808_SENSOR_TEMP_SIGN_MASK;
+   }
+   return act;
+}
 
 int rssi_scan(void){ 
    uint16_t number = DEFAULT_SCAN_LIST_SIZE; 
@@ -72,7 +138,7 @@ int rssi_scan(void){
    return my_rssi;
 }
 
-static void submit(int rssi){ 
+static void submit(float temp, int rssi){ 
    struct addrinfo *res;
    struct in_addr *addr;
    int s, r;
@@ -80,24 +146,20 @@ static void submit(int rssi){
    int total_r;
    char recv_buf[256];
    char request[256];
-  
-   // Read sensors
-   // TODO
-
-
+     
    // Build the submission
    sprintf(request,
       "GET " 
       "/tymheredd/web/submit.php?"
       "password="PASSWORD"&"
-      "temp=%d&"
-      "time=%d"
+      "temp=%f&"
+      "rssi=%d"
       " HTTP/1.0\r\n"
       "Host: "WEB_SERVER":"WEB_PORT"\r\n"
       "User-Agent: esp-idf/1.0 esp32\r\n"
       "\r\n",
-      rssi,
-      0
+      temp,
+      rssi
    );
    ESP_LOGI(TAG, "Request (%d chars): \n\r%s", strlen(request), request);
 
@@ -177,16 +239,18 @@ static void goto_sleep(void){
 }
 
 
-void app_main(void){
-   int rssi;
+void app_main(void){ 
+   float    temp;
+   int      rssi;
    ESP_ERROR_CHECK(nvs_flash_init()); 
    ESP_ERROR_CHECK(esp_netif_init());
-   ESP_ERROR_CHECK(esp_event_loop_create_default());
+   ESP_ERROR_CHECK(esp_event_loop_create_default()); 
+   temp = read_temp();
    rssi = rssi_scan();   
    // If 0 the network was not found so no connect possible
    if(rssi != 0){
       ESP_ERROR_CHECK(example_connect());
-      submit(rssi); 
+      submit(temp, rssi); 
    }
    goto_sleep();
 }
